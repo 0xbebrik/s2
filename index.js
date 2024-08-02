@@ -19,12 +19,12 @@ app.use('/api', routes);
 
 
 app.get("/admin/*", (req, res) => {
-    res.sendFile("/root/server/public/panel.html");
+    res.sendFile("/root/s2/public/panel.html");
 });
 
 app.get('*', (req, res) => {
 
-    res.sendFile("/root/server/public/index.html");
+    res.sendFile("/root/s2/public/index.html");
 });
 
 const start = async () => {
