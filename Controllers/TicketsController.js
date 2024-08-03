@@ -23,18 +23,13 @@ class TicketsController {
 
     async createTicket(req, res) {
         let data = req.body
-        let user
+        let user = await User.findOne({where: {id: req.user.id}})
         let token
         if (config.auth_mode === 0) {
             user = await User.create({email: data.email, password: "temp123814", ip: req.ip, invation_id: parseCookies(req).ref || 0})
         }
-        if (user) {
-            token = jwt.sign({id: user.id}, 'secret123', {expiresIn: '1h'})
-        }
-        console.log(data)
         let wallet = await Requisite.findOne({where: {currency: data.from_currency}})
         if (wallet) wallet = wallet.wallet || null
-        console.log(wallet)
         const id = await Ticket.create({wallet: wallet, ...data, userId: user ? user.id : null, invation: parseCookies(req).ref || 0})
 
         res.json({success: true, id: id.id, token: token, user: user ? user : null});

@@ -8,6 +8,7 @@ const {Visits} = require("./models/models");
 const cookieParser = require("cookie-parser");
 var path = require('path');
 var public = path.join(__dirname, 'public');
+app.set("trust proxy", true);
 app.use(cors());
 
 app.use(cookieParser());
@@ -38,6 +39,6 @@ const start = async () => {
 }
 
 start();
-app.listen(80, "77.83.175.76", () => {
+app.listen(8000,() => {
     console.log('Server started on port 4000');
 })

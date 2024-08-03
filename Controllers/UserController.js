@@ -38,8 +38,12 @@ class UserController {
         if (candidate) {
             return res.status(400).json({success: false, message: 'User with this email already exists'})
         }
+        let ref = {}
         const hashPassword = await bcrypt.hash(password, 3)
-        const user = await User.create({email, password: hashPassword, ip: req.ip, invation_id: parseCookies(req).ref || 0})
+        if (parseCookies(req)?.ref !== undefined) {
+            ref = await Invite.findOne({where: {code: parseCookies(req).ref}})
+        }
+        const user = await User.create({email, password: hashPassword, ip: req.ip, invation_id: ref?.id || 0})
         const token = jwt.sign({id: user.id}, 'secret123', {expiresIn: '1h'})
         await user.save()
         return res.status(200).json({success: true, token: token})

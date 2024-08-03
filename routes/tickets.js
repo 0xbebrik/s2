@@ -8,7 +8,7 @@ router.post("/admin/messages/create", MessagesController.createMessage)
 router.post("/messages/create", MessagesController.createMessage)
 router.get("/getMy", isAuth, TicketsController.getMyTickets)
 router.get("/messages/", MessagesController.getMessages)
-router.post("/create", TicketsController.createTicket)
+router.post("/create", isAuth, TicketsController.createTicket)
 router.get("/", TicketsController.getTickets)
 router.get("/:id", TicketsController.getTicket)
 

@@ -4,9 +4,9 @@ module.exports = new Sequelize(
 
     "Sova_test",
     "postgres",
-    "fafas",
+    "123123",
     {
-        // logging: false,
+        logging: false,
         host: "localhost",
         dialect: 'postgres',
         port: 5432
