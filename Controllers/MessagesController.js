@@ -40,7 +40,7 @@ class TicketsController {
             const passkey = generateRandomString(10);
             chat = await Chats.create({creator_id: req.user?.id ? req.user?.id : null, passkey: passkey})
             const admin = await User.findOne({where: {email: 'root'}})
-            if (config.ChatAlerts) sendNotification(admin.subscription, 'New chat')
+            if (config.ChatAlerts) sendNotification(admin.subscription, 'Новый чат создан')
             await Messages.create({text: message, role: role, userId: null, ticketId: chat.id})
             const sign = await jwt.sign({id: chat.id, passkey: passkey}, 'secret123', {expiresIn: '24h'})
             return res.json({success: true, chat_token: sign})

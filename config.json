@@ -7,6 +7,7 @@
   "tg": "123",
   "email": "333",
   "userRegister": 2,
+  "ChatAlerts": true,
   "UserNotiffication": true,
   "UseEmail": false,
   "AdminNotiffication": false,
