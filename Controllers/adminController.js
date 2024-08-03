@@ -71,7 +71,7 @@ class bestpairsController {
 
     async stat(req, res) {
         const startDate = 1721836019000
-        const endDate = 1722451619000
+        const endDate = new Date()
 
 
         var data = [

@@ -166,7 +166,7 @@ class UserController {
 
         const users = await User.findAll({
             where: {
-                invation_id: id,
+                invation_id: ref.id,
                 createdAt: {
                     [Op.between]: [startDate, endDate]
                 }
@@ -227,7 +227,7 @@ class UserController {
 
             const users = await User.findAll({
                 where: {
-                    invation_id: id,
+                    invation_id: ref.id,
                     createdAt: {
                         [Op.between]: [no, to]
                     }
