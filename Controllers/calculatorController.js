@@ -85,6 +85,7 @@ class CalculatorController {
                     const test = {
                         from: {
                             courseStr: coursee.out[0] + " " + toRow.currency + " = " + coursee.in[0] + " " + fromRow.currency,
+                            id: fromRow.id,
                             currency: fromRow.currency,
                             name: fromRow.FullName,
                             shortName: fromRow.shortName,
@@ -94,6 +95,7 @@ class CalculatorController {
                             minValue: fromRow.min,
                             maxValue: fromRow.max
                         }, to: {
+                            id: toRow.id,
                             currency: toRow.currency,
                             name: toRow.FullName,
                             shortName: toRow.shortName,
@@ -114,6 +116,7 @@ class CalculatorController {
                 const test = {
                     from: {
                         courseStr: coursee.in[0] + " " + fromRow.currency + " = " + coursee.out[0] + " " + toRow.currency,
+                        id: fromRow.id,
                         currency: fromRow.currency,
                         name: fromRow.FullName,
                         accepted: fromRow.accepted || [],
@@ -123,6 +126,7 @@ class CalculatorController {
                         minValue: fromRow.min,
                         maxValue: fromRow.max
                     }, to: {
+                        id: toRow.id,
                         currency: toRow.currency,
                         name: toRow.FullName,
                         shortName: toRow.shortName,

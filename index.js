@@ -6,6 +6,7 @@ const models = require('./models/models');
 const cors = require('cors');
 const {Visits} = require("./models/models");
 const cookieParser = require("cookie-parser");
+const isAuth = require('./middleware/isAuth');
 var path = require('path');
 var public = path.join(__dirname, 'public');
 app.set("trust proxy", true);
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use('/api', routes);
 
 
-app.get("/admin/*", (req, res) => {
+app.get("/admin/*", isAuth,  (req, res) => {
     res.sendFile("/root/s2/public/panel.html");
 });
 
