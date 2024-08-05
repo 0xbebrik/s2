@@ -56,6 +56,7 @@ const Ticket = sequelize.define('ticket', {
     from_Value: {type: DataTypes.DOUBLE},
     to_Value: {type: DataTypes.DOUBLE},
     invation: {type: DataTypes.STRING},
+    step: {type: DataTypes.INTEGER, defaultValue: 0},
     from_currency: {type: DataTypes.INTEGER},
     to_currency: {type: DataTypes.INTEGER},
     FIO: {type: DataTypes.STRING, defaultValue: ''},

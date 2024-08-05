@@ -1,7 +1,7 @@
 const {Messages, User, Chats} = require('../models/models')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const {decode} = require("jsonwebtoken");
+const {decode, verify} = require("jsonwebtoken");
 const {sendNotification} = require("web-push");
 const config = require("../config.json")
 
@@ -32,13 +32,24 @@ class TicketsController {
     }
 
     async createMessage(req, res) {
-        var {ticketId, message, role, passkey} = req.body
+        let userId;
+        try {
+            const token = req.headers.authorization.split(' ')[1]
+            if (!token) {
+                return res.status(200).json({success: false, message: "Не авторизован"})
+            }
+            const decoded = verify(token,'secret123')
+            userId = decoded.id
+        } catch (e) {
+            userId = 0
+        }
+        const {ticketId, message, role, passkey} = req.body;
         if (!ticketId || !message) return
 
         var chat = await Chats.findOne({where: {id: ticketId}})
         if (ticketId === -1 || !chat) {
             const passkey = generateRandomString(10);
-            chat = await Chats.create({creator_id: req.user?.id ? req.user?.id : null, passkey: passkey})
+            chat = await Chats.create({creator_id: userId, passkey: passkey, creator_ip: req.ip})
             const admin = await User.findOne({where: {email: 'root'}})
             if (config.ChatAlerts) sendNotification(admin.subscription, 'Новый чат создан')
             await Messages.create({text: message, role: role, userId: null, ticketId: chat.id})

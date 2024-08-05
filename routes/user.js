@@ -16,4 +16,5 @@ router.get("/chat_settings", userController.getChatSettings)
 router.get("/bestpairs", bestPairsController.getBestPairs)
 router.get("/stat", isAuth, userController.stat)
 router.post("/change_password", isAuth, userController.changePassword)
+router.get("/myvisits", isAuth, userController.getMyVisits)
 module.exports = router

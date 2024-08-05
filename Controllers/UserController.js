@@ -271,6 +271,58 @@ class UserController {
         await User.update({password: hashPassword}, {where: {id: user.id}})
         return res.json({success: true})
     }
+
+    async getMyVisits(req, res) {
+        const id = req.user.id
+        const user = await User.findOne({where: {id: id}})
+        const ref = await Invite.findOne({where: {creator: user.id}})
+        let data;
+        const visits = await Visits.findAll({
+            attributes: [
+                'ip',
+                [sequelize.fn('COUNT', sequelize.col('ip')), 'count'],
+                [sequelize.fn('MIN', sequelize.col('createdAt')), 'firstVisit'],
+                [sequelize.fn("MAX", sequelize.col("createdAt")), "lastVisit"]
+            ],
+            group: ['ip'],
+            where: {
+                ref: ref.code
+            }
+        })
+        for (const {dataValues} of visits) {
+            const users = await User.findAll({attributes: [
+                "id",
+                "email",
+                "createdAt",
+                "blocked",
+                "role",
+                ], where: {ip: dataValues.ip}})
+            let tickets =[];
+            for (const {dataValues} of users) {
+                const ticketPromises = (await Ticket.findAll({where: {userId: dataValues.id}})).map(async (item) => {
+                    const from = await currency.findOne({where: {id: item.dataValues.from_currency}});
+                    const to = await currency.findOne({where: {id: item.dataValues.to_currency}});
+                    item.dataValues.from_currency = from;
+                    item.dataValues.to_currency = to;
+                    return item.dataValues;
+                });
+                const userTickets = await Promise.all(ticketPromises);
+                tickets.push(...userTickets);
+            }
+            data = {
+                ...data,
+                [dataValues.ip]: {
+                    count: dataValues.count,
+                    firstVisit: dataValues.firstVisit,
+                    lastVisit: dataValues.lastVisit,
+                    users: users,
+                    tickets: tickets
+
+                }
+            }
+        }
+        return res.json({success: true, data: data})
+    }
 }
 
 module.exports = new UserController()

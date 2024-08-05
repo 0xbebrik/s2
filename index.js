@@ -20,7 +20,7 @@ app.use(express.json());
 app.use('/api', routes);
 
 
-app.get("/admin/*", isAuth,  (req, res) => {
+app.get("/admin/*",  (req, res) => {
     res.sendFile("/root/s2/public/panel.html");
 });
 

@@ -345,6 +345,12 @@ class bestpairsController {
         return res.json({data: config})
     }
 
+    async setStep(req, res) {
+        const {id, step} = req.body
+        const data = await Ticket.update({step: step}, {where: {id: id}})
+        return res.json({data: data})
+    }
+
 
  }
 
