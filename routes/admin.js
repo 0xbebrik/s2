@@ -17,6 +17,8 @@ router.post("/bestpairs/edit", adminController.editBestPairs)
 router.post("/user/alert", adminController.sendAlertToUser)
 router.post("/bestpairs/delete", adminController.deleteBestPairs)
 
+router.post("/vaults/create", adminController.createVault)
+
 router.post("/step", adminController.setStep)
 
 router.post("/user/delete", adminController.deleteUser)

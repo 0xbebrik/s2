@@ -36,38 +36,7 @@ const update = () => {
 }
 
 class bestpairsController {
-    // async stat(req, res) {
-    //     const period = req.query.period;
-    //     console.log(period);
-    //     const data = [];
-    //
-    //     const getStatsForPeriod = async (daysAgo) => {
-    //         const raw = await Statistics.findAll({
-    //             where: {
-    //                 date: {
-    //                     [Op.gte]: new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000),
-    //                 },
-    //             },
-    //         });
-    //
-    //         for (let i = 0; i < raw.length; i++) {
-    //             data[i] = {
-    //                 name: raw[i].date,
-    //                 visits: raw[i].visits,
-    //                 registrations: raw[i].registrations,
-    //             };
-    //         }
-    //     };
-    //
-    //     if (period === "week") {
-    //         await getStatsForPeriod(7);
-    //     } else if (period === "2week") {
-    //         await getStatsForPeriod(14);
-    //     } else if (period === "month") {
-    //         await getStatsForPeriod(30);
-    //     }
-    //     return res.json({data: data})
-    // }
+
 
     async stat(req, res) {
         const startDate = 1721836019000
@@ -212,6 +181,12 @@ class bestpairsController {
     async editVaults(req, res) {
         const value = req.body
         const data = await currency.update({...value}, {where: {id: value.id}})
+        return res.json({data: data})
+    }
+
+    async createVault(req, res) {
+        const {FullName, Icon, Type, Currency, reserv, min, max, input} = req.body
+        const data = await currency.create({FullName, Icon, Type, Currency, reserv, min, max, input})
         return res.json({data: data})
     }
 
