@@ -76,7 +76,7 @@ class UserController {
             const user = await User.findOne({where: {id: req.user.id}})
             if (!user) return res.json({success: false})
             await User.update({ip: req.ip}, {where: {id: user.id}})
-            if (user.role === 'admin') return res.json({success: true, data: user, to: "../admin/tickets", email: user.email})
+            if (user.role === 'admin') return res.json({success: true, data: user, to: "../../admin/statistics", email: user.email})
             return res.json({success: true, data: req.user, email: user.email, role: user.role})
         }
         return res.json({success: false})
