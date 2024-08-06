@@ -119,7 +119,7 @@ class UserController {
 
     async getChatSettings(req, res){
         config = require("../config.json")
-        return res.json({success: true, OpAvatar: config.Op_avatar, OpName: config.Op_name, ChatAlerts: config.ChatAlerts})
+        return res.json({success: true, OpAvatar: config.Op_avatar, OpName: config.Op_name, ChatAlerts: config.ChatAlerts, supMessage: config.supMessage, supTime: config.supTime})
     }
 
     async stat(req, res) {

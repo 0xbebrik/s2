@@ -163,7 +163,7 @@ class bestpairsController {
 
     async send(req,res){
         const {id, wallet, timer_end} = req.body
-        const data = await Ticket.update({wallet: wallet, requested: false, timer_end: "2024-07-26 07:56:05.910 +00:00"}, {where: {id}})
+        const data = await Ticket.update({wallet: wallet, requested: false, timer_end: (new Date(timer_end))}, {where: {id}})
         return res.json({data: data})
     }
     async saveCourses(req, res) {
@@ -323,6 +323,12 @@ class bestpairsController {
     async setStep(req, res) {
         const {id, step} = req.body
         const data = await Ticket.update({step: step}, {where: {id: id}})
+        return res.json({data: data})
+    }
+
+    async deleteVault(req, res) {
+        const {id} = req.body
+        const data = await currency.destroy({where: {id}})
         return res.json({data: data})
     }
 

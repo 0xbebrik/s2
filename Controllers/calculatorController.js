@@ -65,7 +65,7 @@ class CalculatorController {
 
         const exclude = await ExchangeRate.findOne({where: {from_currency: fromRow.id, to_currency: toRow.id}})
         //
-        var coursee = courses.exchanges.from[stream_id1].to[stream_id2]
+        var coursee
 
         fs.readFile("./valuta.xml", 'utf8', (err, data) => {
             if (err) {
@@ -74,77 +74,46 @@ class CalculatorController {
             }
             xml2js.parseString(data, (err, result) => {
                 coursee = result.rates.item.find(obj => obj.from[0].toUpperCase() === fromRow.shortName.toUpperCase() && obj.to[0].toUpperCase() === toRow.shortName.toUpperCase())
-                if (coursee === undefined) {
-                    return res.json({success: false, message: 'Incorrect input data'})
+
+
+                let courseStr = coursee?.in[0] !== "1" ?
+                    coursee?.out[0] + " " + toRow?.currency + " = " + coursee?.in[0] + " " + fromRow?.currency :
+                    coursee?.in[0] + " " + fromRow?.currency + " = " + coursee?.out[0] + " " + toRow?.currency
+
+                if (coursee?.in === undefined){
+                    courseStr = "1 " + fromRow?.currency + " = " + exclude.rate + " " + toRow?.currency
                 }
-                // if (coursee < 0){
-                // coursee = coursee * 0.01
-                // }
-                console.log(coursee)
-                if (coursee.in[0] !== "1"){
-                    const test = {
-                        from: {
-                            courseStr: coursee.out[0] + " " + toRow.currency + " = " + coursee.in[0] + " " + fromRow.currency,
-                            id: fromRow.id,
-                            currency: fromRow.currency,
-                            name: fromRow.FullName,
-                            shortName: fromRow.shortName,
-                            icon: fromRow.Icon,
-                            accepted: fromRow.accepted || [],
-                            input: fromRow.input,
-                            minValue: fromRow.min,
-                            maxValue: fromRow.max
-                        }, to: {
-                            id: toRow.id,
-                            currency: toRow.currency,
-                            name: toRow.FullName,
-                            shortName: toRow.shortName,
-                            icon: toRow.Icon,
-                            input: toRow.input,
-                            course: 1 / coursee.in[0],
-                            reserv: toRow.reserv
-                        }
-                    }
-                    if (exclude && exclude.rate){
-                        test.to.course = exclude.rate
-                    }
 
-                    return res.json({success: true, data: test})
-                }else{
 
-                // console.log(re)
                 const test = {
                     from: {
-                        courseStr: coursee.in[0] + " " + fromRow.currency + " = " + coursee.out[0] + " " + toRow.currency,
+                        courseStr: courseStr,
                         id: fromRow.id,
                         currency: fromRow.currency,
                         name: fromRow.FullName,
-                        accepted: fromRow.accepted || [],
                         shortName: fromRow.shortName,
                         icon: fromRow.Icon,
+                        accepted: fromRow.accepted || [],
                         input: fromRow.input,
                         minValue: fromRow.min,
                         maxValue: fromRow.max
-                    }, to: {
+                    },
+                    to: {
                         id: toRow.id,
                         currency: toRow.currency,
                         name: toRow.FullName,
                         shortName: toRow.shortName,
                         icon: toRow.Icon,
                         input: toRow.input,
-                        course: parseFloat(coursee.out[0]),
+                        course: coursee?.in[0] !== "1" ? 1 / coursee?.in[0] : parseFloat(coursee?.out[0]),
                         reserv: toRow.reserv
                     }
                 }
-                    if (exclude && exclude.rate){
-                        test.to.course = exclude.rate
-                    }
-
-                    return res.json({success: true, data: test})
+                if (exclude && exclude.rate){
+                    test.to.course = exclude.rate
                 }
 
-
-
+                return res.json({success: true, data: test})
             })
         })
 

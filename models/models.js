@@ -64,7 +64,7 @@ const Ticket = sequelize.define('ticket', {
     btcAdress: {type: DataTypes.STRING, defaultValue: ''},
     requested: {type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false},
     wallet: {type: DataTypes.STRING},
-    timer_end: {type: 'TIMESTAMP'},
+    timer_end: {type: DataTypes.DATE},
 })
 
 const News = sequelize.define('News', {

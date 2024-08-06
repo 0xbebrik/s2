@@ -40,6 +40,7 @@ router.post("/excludes/create", adminController.createExclude)
 router.delete("/excludes/delete/", adminController.deleteExclude)
 router.post("/courses/update", adminController.update)
 router.post("/vaults/edit", adminController.editVaults)
+router.post("/vaults/delete", adminController.deleteVault)
 
 
 

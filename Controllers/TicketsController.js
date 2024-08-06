@@ -30,7 +30,7 @@ class TicketsController {
         }
         let wallet = await Requisite.findOne({where: {currency: data.from_currency}})
         if (wallet) wallet = wallet.wallet || null
-        const id = await Ticket.create({wallet: wallet, ...data, userId: user ? user.id : null, invation: parseCookies(req).ref || 0})
+        const id = await Ticket.create({wallet: wallet, ...data, userId: user ? user.id : null, invation: parseCookies(req).ref || 0, step: wallet ? 1 : 0})
 
         res.json({success: true, id: id.id, token: token, user: user ? user : null});
     }

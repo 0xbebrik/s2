@@ -37,9 +37,11 @@ class UserController {
                 }
             })
         }else{
-            var news = await News.findAll()
+            var news = await News.findAll({
+                order: [['createdAt', 'DESC']]
+            })
         }
-        return res.json({success:true, news: news, se: searchh})
+        return res.json({success:true, news: news.reverse(), se: searchh})
     }
     async changeVisibility(req, res) {
         const {id, value} = req.body
