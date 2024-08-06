@@ -329,6 +329,13 @@ class bestpairsController {
     async deleteVault(req, res) {
         const {id} = req.body
         const data = await currency.destroy({where: {id}})
+        const currencies = await currency.findAll()
+        const updated = await Promise.all(currencies.map(async (record) => {
+            const updatedArray = record.accepted.filter((item) => item !== id);
+            return await record.update({ accepted: updatedArray });
+        }));
+        await ExchangeRate.destroy({where: {from_currency: id}})
+        await ExchangeRate.destroy({where: {to_currency: id}})
         return res.json({data: data})
     }
 

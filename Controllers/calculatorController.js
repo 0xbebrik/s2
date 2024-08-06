@@ -73,7 +73,7 @@ class CalculatorController {
                 return;
             }
             xml2js.parseString(data, (err, result) => {
-                coursee = result.rates.item.find(obj => obj.from[0].toUpperCase() === fromRow.shortName.toUpperCase() && obj.to[0].toUpperCase() === toRow.shortName.toUpperCase())
+                coursee = result.rates.item.find(obj => obj.from[0].toUpperCase() === fromRow.shortName?.toUpperCase() && obj.to[0].toUpperCase() === toRow.shortName.toUpperCase())
 
 
                 let courseStr = coursee?.in[0] !== "1" ?
