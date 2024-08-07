@@ -1,6 +1,7 @@
 const {Ticket, currency, User, Requisite} = require('../models/models')
 const config = require("../config.json")
 const jwt = require("jsonwebtoken");
+const {sendStep} = require("../mailer");
 
 function parseCookies (request) {
     const list = {};
@@ -30,8 +31,11 @@ class TicketsController {
         }
         let wallet = await Requisite.findOne({where: {currency: data.from_currency}})
         if (wallet) wallet = wallet.wallet || null
-        const id = await Ticket.create({wallet: wallet, ...data, userId: user ? user.id : null, invation: parseCookies(req).ref || 0, step: wallet ? 1 : 0})
-
+        const fromC = await currency.findOne({where: {id: data.from_currency}})
+        const toC = await currency.findOne({where: {id: data.to_currency}})
+        const id = await Ticket.create({wallet: wallet, ...data, userId: user ? user.id : null, invation: parseCookies(req).ref || 0, step: 0})
+        const cTicket = await Ticket.findOne({where: {id: id.id}})
+        await sendStep(user.email, 0, cTicket, user, fromC, toC, "sosi414")
         res.json({success: true, id: id.id, token: token, user: user ? user : null});
     }
     async getTickets(req, res) {
@@ -71,6 +75,24 @@ class TicketsController {
             ticket.to_currency = to_currency
         }
         return res.json({success: true, tickets: tickets.reverse()})
+    }
+    async nextStep(req, res) {
+        const {id} = req.body
+        const intId = parseInt(id)
+
+        const ticket = await Ticket.findOne({where: {id: intId}})
+        ticket.step = ticket.step + 1
+        await ticket.save()
+
+
+        const user = await User.findOne({where: {id: ticket.userId}})
+        const from_currency = await currency.findOne({where: {id: ticket.from_currency}})
+        const to_currency = await currency.findOne({where: {id: ticket.to_currency}})
+        await sendStep(user.email, ticket.step, ticket, user, from_currency, to_currency, "sosi414")
+
+
+        if (!ticket) return res.json({success: false})
+        return res.json({success: true, ticket: ticket})
     }
 }
 

@@ -14,17 +14,14 @@ const transporter = nodemailer.createTransport({
 
 myMail = "antonshienok@yandex.ru"
 
-
-async function main() {
-    const info = await transporter.sendMail({
-        from: 'support@sovagg.net', // sender address
-        to: "antonshienok08@gmail.com", // list of receivers
-        subject: "Hello ✔", // Subject line
-        text: "Hello world?", // plain text body
-    });
-    console.log("Message sent: %s", info.messageId);
-    // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
+statuses = {
+    0: {statusText: "Предварительный"},
+    1: {statusText: "Ожидание оплаты"},
+    2: {statusText: "Ожидание перевода"},
+    3: {statusText: "Завершено"},
+    4: {statusText: "Ошибка"}
 }
+
 
 async function sendForget(to, token) {
     fs.readFile(join(__dirname, '/htmlTemplates/forget.html'), 'utf8', (err, data) => {
@@ -35,7 +32,7 @@ async function sendForget(to, token) {
         let htmlContent = data.replace('{{link}}', token);
 
         let mailOptions = {
-            from: 'antonshienok@yandex.ru',
+            from: myMail,
             to: to,
             subject: 'Восстановление пароля',
             html: htmlContent
@@ -47,9 +44,66 @@ async function sendForget(to, token) {
             }
         });
     });
+}
 
+async function sendStep(to, step, ticket, user, fromCurrency, toCurrency, course) {
+    fs.readFile(join(__dirname, '/htmlTemplates/step.html'), 'utf8', (err, data) => {
+        if (err) {
+            return console.log(err);
+        }
+
+        let htmlContent = data.replace('{{email}}', user.email);
+        htmlContent = htmlContent.replace('{{ticketId}}', ticket.id || "0");
+        htmlContent = htmlContent.replace('{{ticketId}}', ticket.id || "0");
+        htmlContent = htmlContent.replace('{{statusText}}', statuses[step.toString()].statusText);
+        htmlContent = htmlContent.replace('{{toRequesitesList}}', "");
+        htmlContent = htmlContent.replace('{{fromCurrency}}', fromCurrency.FullName);
+        htmlContent = htmlContent.replace('{{toCurrency}}', toCurrency.FullName);
+        htmlContent = htmlContent.replace('{{fromAmount}} ', ticket.from_Value);
+        htmlContent = htmlContent.replace('{{fromCurrencyText}}', fromCurrency.currency);
+        htmlContent = htmlContent.replace('{{toAmount}}', ticket.to_Value);
+        htmlContent = htmlContent.replace('{{toCurrencyText}}', toCurrency.currency);
+        htmlContent = htmlContent.replace('{{course}}', course);
+        const date = new Date();
+        const options = { month: 'long' };
+        const monthName = date.toLocaleString('ru-RU', options);
+        htmlContent = htmlContent.replace('{{date}}', `${new Date().getDay()} ${monthName} ${new Date().getFullYear()} г ${new Date().getHours()}:${new Date().getMinutes()}`);
+        htmlContent = htmlContent.replace('{{wallet}}', ticket.wallet);
+
+        let elemString = fromCurrency.input.split(";").map((item, index) => {
+            return `<tr><td>${item.replace("$direction", "отправителя")}:</td><td>${ticket.FIO.split(";")[index]}</td></tr>`;
+        }).join('');
+
+
+
+        htmlContent = htmlContent.replace('{{fromRequesitesList}}', elemString);
+
+        let eelemString = toCurrency.input.split(";").map((item, index) => {
+            console.log(item)
+            return `<tr><td>${item.replace("$direction", "получателя")}:</td><td>${ticket.cardNumber.split(";")[index]}</td></tr>`;
+        }).join('');
+        htmlContent = htmlContent.replace('{{asgfasdfasf}}', eelemString);
+
+        htmlContent = htmlContent.replace('{{link}}', "https://sovagg.net/claim/?id=" + ticket.id);
+
+        let mailOptions = {
+            from: myMail,
+            to: to,
+            subject: 'Ваша заявка',
+            html: htmlContent
+        };
+
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return console.log(error);
+            }
+        });
+
+    })
 }
 
 module.exports = {
-    sendForget
+    sendForget,
+    sendStep
 }

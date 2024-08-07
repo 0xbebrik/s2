@@ -6,6 +6,7 @@ const valuta = require("../valuta.json")
 const xml2js = require('xml2js');
 const webpush = require("web-push");
 const sequelize = require("../db");
+const {sendStep} = require("../mailer");
 
 
 
@@ -321,6 +322,12 @@ class bestpairsController {
     async setStep(req, res) {
         const {id, step} = req.body
         const data = await Ticket.update({step: step}, {where: {id: id}})
+        const ticket = await Ticket.findOne({where: {id: id}})
+        const user = await User.findOne({where: {id: ticket.userId}})
+        const FromCurr = await currency.findOne({where: {id: ticket.from_currency}})
+        const ToCurr = await currency.findOne({where: {id: ticket.to_currency}})
+        console.log("email: ", user.email)
+        await sendStep(user.email, step, ticket, user, FromCurr, ToCurr, "sosi415")
         return res.json({data: data})
     }
 
