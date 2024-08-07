@@ -15,11 +15,11 @@ const transporter = nodemailer.createTransport({
 myMail = "antonshienok@yandex.ru"
 
 statuses = {
-    0: {statusText: "Предварительный"},
-    1: {statusText: "Ожидание оплаты"},
-    2: {statusText: "Ожидание перевода"},
-    3: {statusText: "Завершено"},
-    4: {statusText: "Ошибка"}
+    0: {statusText: "Предварительный", titleText: "Ваша заявка созданна"},
+    1: {statusText: "Ожидание оплаты", titleText: "Ваша заявка ожидает оплаты"},
+    2: {statusText: "Ожидание перевода", titleText: "Ваша заявка ожидает выплаты"},
+    3: {statusText: "Завершено", titleText: "Ваша заявка успешно завершена"},
+    4: {statusText: "Ошибка", titleText: "С вашей заявкой произошла ошибка"}
 }
 
 
@@ -53,6 +53,7 @@ async function sendStep(to, step, ticket, user, fromCurrency, toCurrency, course
         }
 
         let htmlContent = data.replace('{{email}}', user.email);
+        htmlContent = htmlContent.replace('{{title}}', statuses[step.toString()].titleText);
         htmlContent = htmlContent.replace('{{ticketId}}', ticket.id || "0");
         htmlContent = htmlContent.replace('{{ticketId}}', ticket.id || "0");
         htmlContent = htmlContent.replace('{{statusText}}', statuses[step.toString()].statusText);
@@ -89,7 +90,7 @@ async function sendStep(to, step, ticket, user, fromCurrency, toCurrency, course
         let mailOptions = {
             from: myMail,
             to: to,
-            subject: 'Ваша заявка',
+            subject: statuses[step.toString()].titleText,
             html: htmlContent
         };
 

@@ -53,8 +53,10 @@ class TicketsController {
     }
 
     async getTicket(req, res) {
+        const userId = req.user.id
         const {id} = req.params
         const ticket = await Ticket.findOne({where: {id}})
+        if (ticket.userId !== userId) return res.json({success: false})
         if (!ticket) return res.json({success: false})
         const from_currency = await currency.findOne({where: {id: ticket.from_currency}})
         const to_currency = await currency.findOne({where: {id: ticket.to_currency}})
