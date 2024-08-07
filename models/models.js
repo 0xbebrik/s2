@@ -139,5 +139,5 @@ Ticket.belongsTo(User)
 User.hasMany(Messages)
 Messages.belongsTo(User)
 
-module.exports = {User, Ticket, currency, News, Review, ExchangeRate, Messages, Statistics, Invite, Requisite, bestPair, Chats, Visits};
+module.exports = {User, Ticket, currency, News, Review, ExchangeRate, Messages, Statistics, Invite, Requisite, bestPair, Chats, Visits, Settings};
 

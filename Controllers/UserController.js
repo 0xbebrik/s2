@@ -5,6 +5,7 @@ var config = require('../config.json')
 const { v4: uuidv4 } = require('uuid');
 const sequelize = require("../db");
 const {Op} = require("sequelize");
+const {sendForget} = require("../mailer");
 
 function parseCookies (request) {
     const list = {};
@@ -67,7 +68,7 @@ class UserController {
 
     async all(req, res) {
         console.log("connect")
-        const users = await User.findAll({include: [Ticket]})
+        const users = await User.findAll({include: [Ticket], order: [['createdAt', 'DESC']]});
         return res.json({success: true, data: users})
     }
 
@@ -323,6 +324,29 @@ class UserController {
         }
         return res.json({success: true, data: data})
     }
+
+    async forget(req, res) {
+        const {email} = req.body
+        const user = await User.findOne({where: {email: email}})
+        if (!user) {
+            return res.status(400).json({success: false, message: 'User not found'})
+        }
+        console.log("reset for: ", email)
+        const token = jwt.sign({id: user.id}, "secret123", {expiresIn: '1h'})
+        await sendForget(email, token)
+        return res.json({success: true})
+    }
+
+    async checkRecovery(req, res) {
+        const {token} = req.body
+        const {id} = jwt.verify(token, "secret123")
+        const user = await User.findOne({where: {id: id}})
+        if (!user) {
+            return res.status(400).json({success: false, message: 'User not found'})
+        }
+        return res.json({success: true})
+    }
+
 }
 
 module.exports = new UserController()

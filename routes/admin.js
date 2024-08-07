@@ -29,6 +29,8 @@ router.post("/chat_settings", adminController.saveSettings)
 
 router.get("/settings", adminController.getSettings)
 
+router.post("/tpclose", adminController.tpclose)
+
 router.get("/chats", adminController.getChats)
 router.get("/vaults", adminController.vaults)
 router.post("/subscription", adminController.subscription)

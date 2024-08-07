@@ -1,9 +1,8 @@
-const {Statistics, currency, Requisite, Ticket, ExchangeRate, Review, bestPair, Chats, Messages, User, Visits, Invite} = require("../models/models")
+const {Statistics, currency, Requisite, Ticket, ExchangeRate, Review, bestPair, Chats, Messages, User, Visits, Invite,
+    Settings
+} = require("../models/models")
 const {Op, Sequelize, literal, fn, col} = require("sequelize");
 const valuta = require("../valuta.json")
-let config = require("../config.json")
-const fs = require("fs");
-const {query} = require("express");
 const xml2js = require('xml2js');
 const webpush = require("web-push");
 const sequelize = require("../db");
@@ -16,24 +15,10 @@ const VAPID = {
 }
 
 webpush.setVapidDetails(
-    "mailto: antoshienok08@gmail.com",
+    "mailto: HwqJF@example.com",
     VAPID.publicKey,
     VAPID.privateKey
 )
-
-
-
-
-
-
-const update = () => {
-    fs.writeFile("config.json", JSON.stringify(config, null, 2), (err) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-    });
-}
 
 class bestpairsController {
 
@@ -167,8 +152,7 @@ class bestpairsController {
         return res.json({data: data})
     }
     async saveCourses(req, res) {
-        config.use_Excludes = req.body.use_Excludes
-        update()
+        await Settings.findOrCreate({where: {key: 'use_Excludes'}, defaults: {value: req.body.use_Excludes}})
         return res.json({success: true})
     }
 
@@ -307,17 +291,31 @@ class bestpairsController {
     }
 
     async saveSettings(req, res) {
-        const configg = {
-            ...config,
-            ...req.body
+
+        const cfg = req.body
+
+        for (const key of Object.keys(cfg)) {
+            const record = await Settings.findOne({where: {name: key}})
+            if (!record) {
+                await Settings.create({name: key, value: cfg[key]})
+            }else{
+                await Settings.update({value: cfg[key]}, {where: {name: key}})
+            }
         }
-        config = configg
-        update()
         return res.json({success: true})
     }
 
     async getSettings(req, res) {
-        return res.json({data: config})
+        const config = await Settings.findAll()
+        let normal = {};
+        config.forEach((item) => {
+            try {
+                normal[`${item.name}`] = JSON.parse(item.value)
+            } catch (e) {
+                normal[`${item.name}`] = item.value
+            }
+        })
+        return res.json({data: normal})
     }
 
     async setStep(req, res) {
@@ -339,6 +337,16 @@ class bestpairsController {
         return res.json({data: data})
     }
 
+    async tpclose(req, res) {
+        const tp = await Settings.findOne({where: {name: "tp"}})
+        if (!tp) {
+            await Settings.create({name: "tp", value: "true"})
+            return res.json({success: true})
+        }
+        tp.value = !JSON.parse(tp.value)
+        await tp.save()
+        return res.json({success: true})
+    }
 
  }
 
