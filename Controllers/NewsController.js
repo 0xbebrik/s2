@@ -5,7 +5,7 @@ const {Op} = require("sequelize")
 
 class UserController {
     async all(req, res){
-        const news = await News.findAll()
+        const news = await News.findAll({order: [['createdAt', 'ASC']]});
         return res.json({success:true, news: news.reverse()})
 
     }

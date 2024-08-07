@@ -109,8 +109,11 @@ class CalculatorController {
                         reserv: toRow.reserv
                     }
                 }
-                if (exclude && exclude.rate){
+                if (exclude && exclude?.rate !== undefined){
+                    console.log(exclude.rate)
                     test.to.course = exclude.rate
+                }else if (test.to.course === undefined){
+                    test.to.course = 1
                 }
 
                 return res.json({success: true, data: test})

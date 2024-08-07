@@ -123,6 +123,12 @@ const Visits = sequelize.define('visits', {
     ref: {type: DataTypes.STRING}
 })
 
+const Settings = sequelize.define('settings', {
+    id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
+    name: {type: DataTypes.STRING},
+    value: {type: DataTypes.STRING},
+})
+
 
 Ticket.hasMany(Messages)
 Messages.belongsTo(Ticket)
