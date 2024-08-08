@@ -141,20 +141,32 @@ class bestpairsController {
         return res.json({data: data})
     }
 
-    async requests(req, res){
-        const data = await Ticket.findAll()
-        const currencies = await currency.findAll()
-        for (let i = 0; i < data.length; i++) {
-            for (let j = 0; j < currencies.length; j++) {
-                if (data[i].from_currency === currencies[j].id) {
-                    data[i].from_currency = currencies[j]
-                }
-                if (data[i].to_currency === currencies[j].id) {
-                    data[i].to_currency = currencies[j]
-                }
-            }
+    async requests(req, res) {
+        try {
+            const [data, currencies, users, invite] = await Promise.all([
+                Ticket.findAll(),
+                currency.findAll(),
+                User.findAll({attributes: ['id', 'email']}),
+                Invite.findAll()
+            ]);
+
+            const currencyMap = new Map(currencies.map(c => [c.id, c]));
+            const userMap = new Map(users.map(u => [u.id, u]));
+            const invateMap = new Map(invite.map(i => [i.code, i]));
+
+            data.forEach(ticket => {
+                const userrr = userMap.get(invateMap.get(ticket.invation)?.dataValues?.creator)
+                ticket.invation = userrr ? userrr : " "
+                ticket.userId = userMap.get(ticket.userId);
+                ticket.from_currency = currencyMap.get(ticket.from_currency);
+                ticket.to_currency = currencyMap.get(ticket.to_currency);
+            });
+
+            return res.json({ data });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
-        return res.json({data: data})
     }
 
     async send(req,res){
