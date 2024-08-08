@@ -15,7 +15,7 @@ router.use("/news", newsRouter)
 router.use("/reviews", reviewsRouter)
 router.use("/calculator", calculatorRouter)
 router.use("/tickets", ticketRouter)
-router.use("/admin", adminRouter)
+router.use("/admin", isAuth, adminRouter)
 router.use("/statistics", statistics)
 router.get("/bestpairs", bestPairsController.getBestPairs)
 router.get("/tp", async (req, res) => {

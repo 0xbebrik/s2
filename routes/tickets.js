@@ -9,7 +9,7 @@ router.post("/messages/create", MessagesController.createMessage)
 router.get("/getMy", isAuth, TicketsController.getMyTickets)
 router.get("/messages/", MessagesController.getMessages)
 router.post("/create", isAuth, TicketsController.createTicket)
-router.get("/", TicketsController.getTickets)
+router.get("/", isAuth, TicketsController.getTickets)
 router.get("/:id", isAuth, TicketsController.getTicket)
 router.post("/next_step", TicketsController.nextStep)
 

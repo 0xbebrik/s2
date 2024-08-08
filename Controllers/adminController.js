@@ -2,6 +2,7 @@ const { currency, Requisite, Ticket, ExchangeRate, Review, bestPair, Chats, Mess
     Settings
 } = require("../models/models")
 const {Op} = require("sequelize");
+const valuta = require("../valuta.json")
 const webpush = require("web-push");
 const sequelize = require("../db");
 const {sendStep} = require("../mailer");
