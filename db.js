@@ -23,7 +23,7 @@ module.exports = new Sequelize(
     "fafas",
     {
         logging: false,
-        host: "localhost",
+        host: "77.83.175.76",
         dialect: 'postgres',
         port: 5432
     }

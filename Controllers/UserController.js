@@ -1,4 +1,4 @@
-const {User, currency, Ticket, Invite, Visits} = require('../models/models')
+const {User, currency, Ticket, Invite, Visits, Settings, Chats} = require('../models/models')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 var config = require('../config.json')
@@ -67,10 +67,57 @@ class UserController {
     }
 
     async all(req, res) {
-        console.log("connect")
-        const users = await User.findAll({include: [Ticket], order: [['createdAt', 'DESC']]});
-        return res.json({success: true, data: users})
+        try {
+            const users = await User.findAll({
+                include: [Ticket],
+                order: [['createdAt', 'DESC']],
+                attributes: ['id', 'email', 'ip', 'blocked', 'role', 'subscription', "createdAt", "updatedAt"],
+                raw: true
+            });
+
+            users.forEach((item) => {
+                item.subscription = item.subscription !== null;
+            })
+
+            const userIds = users.map(user => user.id);
+
+            const ticketCounts = await Ticket.findAll({
+                where: { userId: userIds },
+                attributes: ['userId', [sequelize.fn('COUNT', sequelize.col('id')), 'ticketCount']],
+                group: ['userId'],
+                raw: true
+            });
+
+            const chatCounts = await Chats.findAll({
+                where: { creator_id: userIds },
+                attributes: ['creator_id', [sequelize.fn('COUNT', sequelize.col('id')), 'ChatsCount']],
+                group: ['creator_id'],
+                raw: true
+            });
+
+            const ticketCountMap = ticketCounts.reduce((acc, item) => {
+                acc[item.userId] = item.ticketCount;
+                return acc;
+            }, {});
+
+            const chatCountMap = chatCounts.reduce((acc, item) => {
+                acc[item.creator_id] = item.ChatsCount;
+                return acc;
+            }, {});
+
+            const data = users.map(user => ({
+                ...user,
+                ticketCount: ticketCountMap[user.id] || 0,
+                ChatsCount: chatCountMap[user.id] || 0
+            }));
+
+            return res.json({ success: true, data: data });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
     }
+
 
     async getme(req, res) {
         if (req.user) {
@@ -78,7 +125,7 @@ class UserController {
             if (!user) return res.json({success: false})
             await User.update({ip: req.ip}, {where: {id: user.id}})
             if (user.role === 'admin') return res.json({success: true, data: user, to: "../../admin/statistics", email: user.email})
-            return res.json({success: true, data: req.user, email: user.email, role: user.role})
+            return res.json({success: true, data: {id: user.id}, email: user.email, role: user.role})
         }
         return res.json({success: false})
         }
@@ -119,8 +166,32 @@ class UserController {
     }
 
     async getChatSettings(req, res){
-        config = require("../config.json")
-        return res.json({success: true, OpAvatar: config.Op_avatar, OpName: config.Op_name, ChatAlerts: config.ChatAlerts, supMessage: config.supMessage, supTime: config.supTime})
+        const settings = await Settings.findAll()
+
+        const opAvatarSetting = settings.find(obj => obj.name === "OpAvatar");
+        const opNameSetting = settings.find(obj => obj.name === "OpName");
+        const chatAlertsSetting = settings.find(obj => obj.name === "ChatAlerts");
+        const supMessageSetting = settings.find(obj => obj.name === "supMessage");
+        const supTimeSetting = settings.find(obj => obj.name === "supTime");
+
+
+
+        return res.json({
+            success: true,
+            OpAvatar: opAvatarSetting ? opAvatarSetting.value : "",
+            OpName:  opNameSetting ? opNameSetting.value : "",
+            ChatAlerts: chatAlertsSetting ? JSON.parse(chatAlertsSetting.value) : false,
+            supMessage: supMessageSetting ? supMessageSetting.value : "",
+            supTime: supTimeSetting ? JSON.parse(supTimeSetting.value) : 0
+            })
+        // return res.json({
+        //     success: true,
+        //     OpAvatar: "1",
+        //     OpName:  "2",
+        //     ChatAlerts: false,
+        //     supMessage: "123",
+        //     supTime: 3
+        //     })
     }
 
     async stat(req, res) {

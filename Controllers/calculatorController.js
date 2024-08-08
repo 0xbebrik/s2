@@ -1,18 +1,8 @@
 const {currency, ExchangeRate} = require('../models/models')
-const config = require("../config.json")
 const fs = require('fs')
 const courses = require("../valuta.json")
 const xml2js = require("xml2js");
 
-
-const update = () => {
-    fs.writeFile("config.json", JSON.stringify(config, null, 2), (err) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
-    });
-}
 
 
 class CalculatorController {
@@ -57,7 +47,6 @@ class CalculatorController {
         // if (!coursee) {
         //  const   coursee = 1.641570699538095e-7
         // }
-        console.log(fromRow.shortName, toRow.shortName)
         // const re = await ExchangeRate.findOne({where: {from_currency: fromRow.id, to_currency: toRow.id}})
         // const stream_id1 = this.getKeyByValue(jjson.exchanges.currencies.aliases, fromRow.shortName)
         const stream_id1 = Object.keys(courses.exchanges.currencies.aliases).find(key => courses.exchanges.currencies.aliases[key] === fromRow.shortName)
@@ -110,7 +99,6 @@ class CalculatorController {
                     }
                 }
                 if (exclude && exclude?.rate !== undefined){
-                    console.log(exclude.rate)
                     test.to.course = exclude.rate
                 }else if (test.to.course === undefined){
                     test.to.course = 1
@@ -125,7 +113,7 @@ class CalculatorController {
     async getExcludes(req, res) {
         const excludes = await ExchangeRate.findAll()
         const currencies = await currency.findAll()
-        return res.json({success: true, data: {excludees: excludes, currencies: currencies}, settings: config})
+        return res.json({success: true, data: {excludees: excludes, currencies: currencies}})
     }
 }
 

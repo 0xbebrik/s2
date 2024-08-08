@@ -23,6 +23,12 @@ router.get("/tp", async (req, res) => {
     res.json({value: JSON.parse(value.value)})
 })
 
+router.get("/settings", async (req, res) => {
+    const tg = await Settings.findOne({where: {name: "tg"}})
+    const email = await Settings.findOne({where: {name: "email"}})
+    res.json({data: {tg: tg.value, email: email.value}})
+})
+
 
 
 module.exports = router

@@ -2,24 +2,45 @@ const nodemailer = require("nodemailer");
 const fs = require('fs');
 const { promisify } = require('util');
 const {join} = require("node:path");
+const {Settings} = require("./models/models");
 const readFileAsync = promisify(fs.readFile);
 
-const transporter = nodemailer.createTransport({
-    service: "yandex",
-    auth: {
-        user: "antonshienok@yandex.ru",
-        pass: "kbcjkpmacuqzqhyv",
-    },
-});
+let host, port, user, pass, secure, transporter, myMail
 
-myMail = "antonshienok@yandex.ru"
+const loadSettings = async () => {
+    const settings = await Settings.findAll();
+
+    host = settings.find(obj => obj.name === "mailHost")
+    port = settings.find(obj => obj.name === "mailPort")
+    user = settings.find(obj => obj.name === "mailUser")
+    pass = settings.find(obj => obj.name === "mailPass")
+    myMail = user.value
+    secure = settings.find(obj => obj.name === "mailSecure")
+}
+
+(async () => {
+    await loadSettings().then(() => {
+        transporter = nodemailer.createTransport({
+            host: host.value,
+            port: JSON.parse(port.value),
+            secure: JSON.parse(secure.value),
+            auth: {
+                user: user.value,
+                pass: pass.value,
+            },
+        });
+    })
+})()
+
+
+
 
 statuses = {
-    0: {statusText: "Предварительный", titleText: "Ваша заявка созданна"},
-    1: {statusText: "Ожидание оплаты", titleText: "Ваша заявка ожидает оплаты"},
-    2: {statusText: "Ожидание перевода", titleText: "Ваша заявка ожидает выплаты"},
-    3: {statusText: "Завершено", titleText: "Ваша заявка успешно завершена"},
-    4: {statusText: "Ошибка", titleText: "С вашей заявкой произошла ошибка"}
+    0: {statusText: "Предварительный", titleText: "Ваша заявка созданна!"},
+    1: {statusText: "Ожидание оплаты", titleText: "Ваша заявка ожидает оплаты!"},
+    2: {statusText: "Ожидание перевода", titleText: "Ваша заявка ожидает выплаты!"},
+    3: {statusText: "Завершено", titleText: "Ваша заявка успешно завершена!"},
+    4: {statusText: "Ошибка", titleText: "С вашей заявкой произошла ошибка!"}
 }
 
 
@@ -65,6 +86,7 @@ async function sendStep(to, step, ticket, user, fromCurrency, toCurrency, course
         htmlContent = htmlContent.replace('{{toAmount}}', ticket.to_Value);
         htmlContent = htmlContent.replace('{{toCurrencyText}}', toCurrency.currency);
         htmlContent = htmlContent.replace('{{course}}', course);
+        htmlContent = htmlContent.replace('{{title}}', statuses[step.toString()].titleText);
         const date = new Date();
         const options = { month: 'long' };
         const monthName = date.toLocaleString('ru-RU', options);

@@ -7,6 +7,7 @@ const xml2js = require('xml2js');
 const webpush = require("web-push");
 const sequelize = require("../db");
 const {sendStep} = require("../mailer");
+const {readFile} = require("node:fs");
 
 
 
@@ -97,7 +98,16 @@ class bestpairsController {
     // }
 
     async vaults(req, res) {
-        res.json({ data: valuta, settings: config});
+        const config = await Settings.findAll()
+        let normal = {};
+        config.forEach((item) => {
+            try {
+                normal[`${item.name}`] = JSON.parse(item.value)
+            } catch (e) {
+                normal[`${item.name}`] = item.value
+            }
+        })
+        res.json({ data: valuta, settings: normal});
     }
 
     async requisites(req, res) {
@@ -186,17 +196,24 @@ class bestpairsController {
         return res.json({data: data})
     }
     async update(req, res) {
-        config.last_update = Date.now()
-        update()
-        fs.readFile("./valuta.xml", 'utf8', (err, data) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
-            xml2js.parseString(data, (err, result) => {
-                return res.json({data: result})
-            })
-        })
+        const last_update = Date.now()
+        const [data, created] = await Settings.findOrCreate({where: {name: 'last_update'}, defaults: {value: last_update}})
+
+        if (!created){
+            await Settings.update({value: last_update}, {where: {name: 'last_update'}})
+        }
+
+        // readFile("./valuta.xml", 'utf8', (err, data) => {
+        //     if (err) {
+        //         console.error(err);
+        //         return;
+        //     }
+        //     xml2js.parseString(data, (err, result) => {
+        //         return res.json({data: result})
+        //     })
+        // })
+
+        return res.json({data: data})
     }
 
     async addReview(req, res) {
