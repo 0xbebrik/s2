@@ -1,6 +1,5 @@
 const {Ticket, currency, User, Requisite} = require('../models/models')
 const config = require("../config.json")
-const jwt = require("jsonwebtoken");
 const {sendStep} = require("../mailer");
 
 function parseCookies (request) {

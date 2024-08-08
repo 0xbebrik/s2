@@ -402,19 +402,21 @@ class UserController {
         if (!user) {
             return res.status(400).json({success: false, message: 'User not found'})
         }
-        console.log("reset for: ", email)
-        const token = jwt.sign({id: user.id}, "secret123", {expiresIn: '1h'})
+        const token = jwt.sign({id: user.id}, "secret123", {expiresIn: '24h'})
         await sendForget(email, token)
         return res.json({success: true})
     }
 
-    async checkRecovery(req, res) {
-        const {token} = req.body
+
+    async resetPassword(req, res) {
+        const {token, password} = req.body
         const {id} = jwt.verify(token, "secret123")
         const user = await User.findOne({where: {id: id}})
         if (!user) {
             return res.status(400).json({success: false, message: 'User not found'})
         }
+        const hashPassword = await bcrypt.hash(password, 3)
+        await User.update({password: hashPassword}, {where: {id: user.id}})
         return res.json({success: true})
     }
 

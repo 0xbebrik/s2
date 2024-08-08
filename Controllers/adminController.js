@@ -1,13 +1,10 @@
-const {Statistics, currency, Requisite, Ticket, ExchangeRate, Review, bestPair, Chats, Messages, User, Visits, Invite,
+const { currency, Requisite, Ticket, ExchangeRate, Review, bestPair, Chats, Messages, User, Visits, Invite,
     Settings
 } = require("../models/models")
-const {Op, Sequelize, literal, fn, col} = require("sequelize");
-const valuta = require("../valuta.json")
-const xml2js = require('xml2js');
+const {Op} = require("sequelize");
 const webpush = require("web-push");
 const sequelize = require("../db");
 const {sendStep} = require("../mailer");
-const {readFile} = require("node:fs");
 
 
 
@@ -84,18 +81,6 @@ class bestpairsController {
 
         return res.json({success: true, data: data})
     }
-    // async stat(req, res) {
-    //     const startDate = 1721748987 // Начальная дата периода
-    //     const endDate = 1722364587 // Конечная дата периода
-    //
-    //     if (!startDate || !endDate) {
-    //         return res.status(400).json({ error: 'startDate and endDate are required' });
-    //     }
-    //
-    //     // Создаем временной ряд дат
-    //     const dates = [];
-    //
-    // }
 
     async vaults(req, res) {
         const config = await Settings.findAll()
@@ -214,16 +199,6 @@ class bestpairsController {
         if (!created){
             await Settings.update({value: last_update}, {where: {name: 'last_update'}})
         }
-
-        // readFile("./valuta.xml", 'utf8', (err, data) => {
-        //     if (err) {
-        //         console.error(err);
-        //         return;
-        //     }
-        //     xml2js.parseString(data, (err, result) => {
-        //         return res.json({data: result})
-        //     })
-        // })
 
         return res.json({data: data})
     }

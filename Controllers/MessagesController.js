@@ -1,7 +1,5 @@
 const {Messages, User, Chats} = require('../models/models')
-const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const {decode, verify} = require("jsonwebtoken");
 const {sendNotification} = require("web-push");
 const config = require("../config.json")
 
@@ -18,18 +16,6 @@ function generateRandomString(length) {
 
 class TicketsController {
 
-    async createChat(req, res) {
-        const {ChatId, startMessage} = req.body
-        console.log(ChatId, startMessage)
-        await Messages.create({
-            text: startMessage,
-            role: 'USER',
-            userId: 1,
-            ticketId: ChatId
-        });
-        const newMessage = await Messages.findAll({where: {ticketId: ChatId}})
-        res.json({success: true, message: newMessage});
-    }
 
     async createMessage(req, res) {
         let userId;
@@ -43,7 +29,7 @@ class TicketsController {
         const {ticketId, message, role, passkey} = req.body;
         if (!ticketId || !message) return
 
-        var chat = await Chats.findOne({where: {id: ticketId}})
+        let chat = await Chats.findOne({where: {id: ticketId}});
         if (ticketId === -1 || !chat) {
             const passkey = generateRandomString(10);
             chat = await Chats.create({creator_id: userId, passkey: passkey, creator_ip: req.ip})
@@ -54,7 +40,7 @@ class TicketsController {
             return res.json({success: true, chat_token: sign})
         }else{
 
-            var verify = false
+            let verify = false;
 
             try {
                 jwt.verify(passkey, 'secret123')
