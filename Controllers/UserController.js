@@ -68,12 +68,27 @@ class UserController {
 
     async all(req, res) {
         try {
-            const users = await User.findAll({
-                include: [Ticket],
-                order: [['createdAt', 'DESC']],
-                attributes: ['id', 'email', 'ip', 'blocked', 'role', 'subscription', "createdAt", "updatedAt"],
+
+            const Invations = await Invite.findAll({
+                attributes: ['id', 'code', 'creator', 'createdAt'],
                 raw: true
             });
+
+            const InvationsMap = Invations.reduce((acc, item) => {
+                acc[item.id] = item;
+                return acc;
+            }, {});
+
+            const users = await User.findAll({
+                order: [['createdAt', 'DESC']],
+                attributes: ['id', 'email', 'ip', 'blocked', 'role', 'subscription', "createdAt", "updatedAt", "invation_id"],
+                raw: true
+            });
+
+            const usersMap = users.reduce((acc, item) => {
+                acc[item.id] = item;
+                return acc;
+            }, {});
 
             users.forEach((item) => {
                 item.subscription = item.subscription !== null;
@@ -107,6 +122,11 @@ class UserController {
 
             const data = users.map(user => ({
                 ...user,
+                invated_by: {
+                    id: InvationsMap[user.invation_id]?.creator,
+                    code: InvationsMap[user.invation_id]?.code,
+                    email: usersMap[InvationsMap[user.invation_id]?.creator]?.email
+                },
                 ticketCount: ticketCountMap[user.id] || 0,
                 ChatsCount: chatCountMap[user.id] || 0
             }));
